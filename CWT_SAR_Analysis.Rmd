@@ -104,7 +104,32 @@ missing_expansions(
 )
 ```
 
-# Prepare data for SAR analysis (v1: grouped tag code analysis)
+# Prepare data for SAR analysis (v1: SAR analysis by individual tag code)
+Here, we will take the further refine our filtering, and process our initial raw data pull from RMIS into an easily digestible format for analysis. This function can be used to assemble data by groups of tag codes, or at the individual tag code level. Below the function is set up to conduct a grouped analysis. This will write the final ready-for-analysis csv file to your "results" directory.
+```{r set_options, echo = FALSE, message = FALSE}
+dat<-preparedata(
+  datafile ="UCRSuChk_CWT_data.xlsx",
+  MPRfilters = c("High Seas","Juvenile Sampling"),
+  CWT_status = "CWT",
+  mark = "Ad",
+  min_ocean_age = 2,
+  min_total_age = 3,
+  max_ocean_age = 5,
+  max_total_age = 6,
+  adjust_expanded_tags_for_terminal_harvest = F,
+  terminal_harvest_file=NULL,
+  set_expanded_to_raw_when_missing=T, #must be T if expanding escapement for terminal harvest!!!
+  create_age_season_group = F, #must be T if expanding escapement for terminal harvest!!!
+  release_group_DOYs = NULL,
+  release_group_cats= NULL,
+  rel_groups<-c("hatchery","stock","release_site","brood_year","tag_code","first_release_month","first_release_doy","last_release_doy","avg_weight","release_age","avg_length"),
+  rec_groups<-c(NULL),
+  writefile = "Yes",
+  filename = "UCRSuChk_CWT_Analysis_bytag_"
+)
+```
+
+# Prepare data for SAR analysis (v1: SAR analysis by grouped tag codes)
 Here, we will take the further refine our filtering, and process our initial raw data pull from RMIS into an easily digestible format for analysis. This function can be used to assemble data by groups of tag codes, or at the individual tag code level. Below the function is set up to conduct a grouped analysis. A version by tag code will follow.This will write the final ready-for-analysis csv file to your "results" directory.
 ```{r set_options, echo = FALSE, message = FALSE}
 dat<-preparedata(
@@ -130,32 +155,7 @@ dat<-preparedata(
 ```
 
 
-# Prepare data for SAR analysis (v2: individual tag code analysis)
-Here, we will take the further refine our filtering, and process our initial raw data pull from RMIS into an easily digestible format for analysis. This function can be used to assemble data by groups of tag codes, or at the individual tag code level. Below the function is set up to conduct a grouped analysis. This will write the final ready-for-analysis csv file to your "results" directory.
-```{r set_options, echo = FALSE, message = FALSE}
-dat<-preparedata(
-  datafile ="UCRSuChk_CWT_data.xlsx",
-  MPRfilters = c("High Seas","Juvenile Sampling"),
-  CWT_status = "CWT",
-  mark = "Ad",
-  min_ocean_age = 2,
-  min_total_age = 3,
-  max_ocean_age = 5,
-  max_total_age = 6,
-  adjust_expanded_tags_for_terminal_harvest = F,
-  terminal_harvest_file=NULL,
-  set_expanded_to_raw_when_missing=T, #must be T if expanding escapement for terminal harvest!!!
-  create_age_season_group = F, #must be T if expanding escapement for terminal harvest!!!
-  release_group_DOYs = NULL,
-  release_group_cats= NULL,
-  rel_groups<-c("hatchery","stock","release_site","brood_year","tag_code","first_release_month","first_release_doy","last_release_doy","avg_weight","release_age","avg_length"),
-  rec_groups<-c(NULL),
-  writefile = "Yes",
-  filename = "UCRSuChk_CWT_Analysis_bytag_"
-)
-```
-
-# Run analysis (v1: by groups of tag codes)
+# Run analysis (v1: SAR analysis by individual tag code)
 This code will run the SAR analysis using JAGS, where logit(SAR) follows a multivariate normal random walk [INSERT MORE DETAILS OF GROUP ANALYSIS HERE]
 ```{r set_options, echo = FALSE, message = FALSE}
 using("MASS","R2jags","RColorBrewer","mgcv")
@@ -166,7 +166,7 @@ run_analysis(dat = "UCRSuChk_CWT_Analysis_bytag_Data_for_Analysis.csv",
 )
 ```
 
-# Run analysis (v1: by groups of tag codes)
+# Run analysis (v2: SAR analysis by grouped tag codes)
 This code will run the SAR analysis using JAGS, where SAR is estimated via a gam. The model structure is currently defined in the "runanalysis" function and may need to be edited to accomodate your analysis of interest.
 ```{r set_options, echo = FALSE, message = FALSE}
 using("MASS","R2jags","RColorBrewer","mgcv")
