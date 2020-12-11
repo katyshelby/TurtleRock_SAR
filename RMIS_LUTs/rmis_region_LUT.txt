@@ -1,0 +1,52 @@
+rmis_region	rmis_region_name	rmis_domain	rmis_basin_count
+AKGN	"Alaska, general"	AK	1
+ALSR	Alsek R	TR	1
+BCGN	"British Columbia, general"	BC	1
+CAGN	"California, general"	CA	1
+CEAK	Central Alaska	AK	6
+CECA	Central California Coast	CA	4
+CECR	Central Columbia R; Bonnev-McNary Dam	CR	8
+CHIL	Chilkat R	TR	1
+CISR	Commonwealth Independent States / Russia	OI	2
+COBC	Coastal British Columbia	BC	4
+CRGN	"Columbia River, general"	CR	1
+FRTH	"Fraser R, Thompson R"	BC	5
+GRAY	Grays Harbor	WA	3
+GST	Georgia Strait	BC	4
+HOOD	Hood Canal	WA	4
+INGN	"Other / International, general"	OI	1
+JAPN	Japan	OI	2
+JNST	Johnstone Strait	BC	1
+JUAN	Strait of Juan de Fuca	WA	3
+KLTR	"Klamath R, Trinity R"	CA	3
+LOCR	Lower Columbia R; mouth-Bonnev Dam	CR	8
+LOYR	Lower Yukon R; mouth - intl. boundary	YR	1
+MPS	Mid Puget Sound	WA	5
+NASK	Nass R - Skeena R	BC	3
+NOAK	Northern Alaska	AK	5
+NOCA	Northern California Coast	CA	3
+NOOR	Northern Oregon Coast	OR	6
+NOWA	Northern Washington	WA	4
+NPS	Northern Puget Sound	WA	4
+NWC	Northern Washington Coast	WA	3
+ORGN	"Oregon, general"	OR	1
+QCI	Queen Charlotte Islands	BC	1
+SAFA	"Sacramento R, Feather R, American R"	CA	4
+SEAK	Southeastern Alaska	AK	6
+SJOA	San Joaquin R	CA	5
+SKAG	Skagit R	WA	3
+SNAK	Snake R	CR	6
+SOCA	Southern California Coast	CA	1
+SOOR	Southern Oregon Coast	OR	7
+SPS	Southern Puget Sound	WA	6
+STUN	"Stikine R, Unuk R"	TR	1
+TAWH	"Taku R, Whiting R"	TR	1
+TRAN	Transboundary Rivers in Canada	BC	4
+TRGN	"Transboundary Rivers, general"	TR	1
+UPCR	Upper Columbia R; abv McNary; Exc Snake	CR	7
+UPYR	Upper Yukon R; above intl. boundary	YR	1
+WAGN	"Washington, general"	WA	3
+WCVI	Western Vancouver Island	BC	3
+WEAK	Western Alaska	AK	4
+WILP	Willapa Bay	WA	4
+YRGN	"Yukon River, general"	YR	1

@@ -1,0 +1,50 @@
+	data{
+	  for(s in 1:S){
+	      zeros[s] = 0
+	  }
+	}
+model{
+  for(i in 1:n){
+    #likelihood
+    Raw_Recoveries[i] ~ dbetabin(p[Year[i],Strategy[i]] * sample_rate_obs[i] * Kappa, (1-p[Year[i],Strategy[i]]) * Kappa, Releases[i])
+  }
+  for(y in 1:Y){
+    for(s in 1:S){
+      #transformed params
+      logit(p[y,s]) = mu[s] + w[y,s]
+    }
+    #predicted returns
+    for(o in 1:O){
+      for(s in 1:S){
+        R[y,o,s] ~ dbin(p[y,s],options[o,s])
+      }
+      R_sum[y,o] = sum(R[y,o,1:S])
+      log_R_sum[y,o] = log(sum(R[y,o,1:S]))
+    }
+  }
+  for(y in 2:Y){
+    w[y,1:S] ~ dmnorm.vcov(phi*w[y-1,1:S], Sigma[1:S, 1:S])
+  }
+  for(o in 1:O){
+    log(R_sum_med[o]) = mean(log_R_sum[1:Y,o])
+    R_sum_mean[o] = mean(R_sum[1:Y,o])
+  }
+  #hyper/global priors
+  w[1,1:S] ~ dmnorm.vcov(zeros[1:S], Sigma[1:S, 1:S] * 3)
+  
+  for(i in 1:S){
+    mu[i] ~ dnorm(0,1/(5*5))
+    Sigma[i,i]<-sigma[i]*sigma[i]
+    sigma[i] ~ dt(0,1/(2.5*2.5),1) T(0,)
+  }
+  for(i in 2:(S)){
+    for(j in 1:(i-1)){
+      Sigma[i,j]<-corr*sigma[i]*sigma[j]
+      Sigma[j,i]<-Sigma[i,j]
+    }
+  }
+  corr ~ dunif(-1,1)
+  phi = (phi.prior * 2) - 1
+  phi.prior ~ dbeta(2,2)
+  Kappa ~ dpar(0.1, 1.5) 
+}
