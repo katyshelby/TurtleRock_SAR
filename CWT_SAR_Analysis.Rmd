@@ -1,5 +1,4 @@
 ---
----
 title: CWT SAR Analysis
 author: Thomas Buehrens & Ben Cox
 output:
@@ -12,7 +11,6 @@ output:
     toc: yes
     toc_depth: 3
     toc_float: yes
----
 ---
 
 ***
@@ -37,7 +35,7 @@ All analyses require R software [**(link)**](https://cran.r-project.org/) (v3.4.
 
 # Functions
 We also need a couple of helper functions which we will load from the functions folder, which we will load using the walk() function from the purrr package (which we will install if it is not already installed).
-```{r load_funcs, results = "hide"}
+```{r load_funcs, message = FALSE, warning = FALSE,results = "hide"}
 #==========================================
 # Source function files in functions folder
 #==========================================
@@ -52,12 +50,14 @@ purrr::walk(files, source)
 
 # Packages
 In addition to purr, We also need a few packages that are not included with the base installation of R, so we begin by installing them (if necessary) and then loading them.
-```{r load_pkgs, message = FALSE, warning = FALSE}
+```{r load_pkgs1, message = FALSE, warning = FALSE,results = "hide"}
 #===============================================
 # Load packages, install and load if not already
 #===============================================
 using("lubridate", "openxlsx","tidyverse","readxl")
-detach(package:MASS, unload=TRUE)
+if("MASS" %in% (.packages())){
+  detach("package:MASS", unload=TRUE) 
+}
 ```
 
 
@@ -70,7 +70,7 @@ In this section we will use functions to complete an initial filter of CWT data 
 4. Optionally, a user can specify a run timing, multiple comma separated run timings in vector form, or leave run timing blank.
 The function will optionally download RMIS data to your "GatherData" directory (which it will create on the fly if it doesn't already exist), query the data, and write the queried subset of raw RMIS data to an excel file in the "results" directory, which it will create on the fly if it doesn't exist.
 
-```{r set_options, echo = FALSE, message = FALSE}
+```{r get_data, message = FALSE, warning = FALSE,results = "hide"}
 getdata(download_releases = "No",
         download_recoveries = "No",
         first_brood_year = 1995,
@@ -89,7 +89,7 @@ getdata(download_releases = "No",
 
 # Checking for missing expansions
 This section will look at where estimated (expanded) tags are missing from the SAR data queried. Users can specify how they would like recovery data grouped to look for missing expansions of CWT data. Year is included by default. Missing expansions are important because often SAR analysis relies on expanded recoveries and years and locations that report raw recoveries only many bias SAR analysis. This function will write out a csv file to look at what % of raw recoveries are unexpanded by release group (based on the release group variables the user specifies). If a lot of the raw recoveries are unexpanded, consider further filtering your dataset to exclude years/recoveries types/release locations plagued by this problem.
-```{r set_options, echo = FALSE, message = FALSE}
+```{r missing_expansions, message = FALSE, warning = FALSE,results = "hide"}
 missing_expansions(
   datafile = "UCRSuChk_CWT_data.xlsx",
   MPRfilters = c("High Seas","Juvenile Sampling"),
@@ -106,7 +106,7 @@ missing_expansions(
 
 # Prepare data for SAR analysis (v1: SAR analysis by individual tag code)
 Here, we will take the further refine our filtering, and process our initial raw data pull from RMIS into an easily digestible format for analysis. This function can be used to assemble data by groups of tag codes, or at the individual tag code level. Below the function is set up to conduct a grouped analysis. This will write the final ready-for-analysis csv file to your "results" directory.
-```{r set_options, echo = FALSE, message = FALSE}
+```{r prepare_data1, message = FALSE, warning = FALSE,results = "hide"}
 dat<-preparedata(
   datafile ="UCRSuChk_CWT_data.xlsx",
   MPRfilters = c("High Seas","Juvenile Sampling"),
@@ -129,9 +129,21 @@ dat<-preparedata(
 )
 ```
 
-# Prepare data for SAR analysis (v1: SAR analysis by grouped tag codes)
+
+# Run analysis (v1: SAR analysis by grouped tag codes)
+This code will run the SAR analysis using JAGS, where SAR is estimated via a gam. The model structure is currently defined in the "runanalysis" function and may need to be edited to accomodate your analysis of interest.
+```{r run_analysis1, message = FALSE, warning = FALSE,results = "hide",fig.show='hide'}
+using("MASS","R2jags","RColorBrewer","mgcv")
+run_analysis(datafile = "UCRSuChk_CWT_Analysis_bytag_Data_for_Analysis.csv",
+             bygrouportagcode = "tagcode",
+             grouplist=NA,#list groups for group analysis
+             options=NA #this is if you wanted to compare total returns as a function of different mixtures of smolt release strategies; right now only functional for grouped analysis
+)
+```
+
+# Prepare data for SAR analysis (v2: SAR analysis by grouped tag codes)
 Here, we will take the further refine our filtering, and process our initial raw data pull from RMIS into an easily digestible format for analysis. This function can be used to assemble data by groups of tag codes, or at the individual tag code level. Below the function is set up to conduct a grouped analysis. A version by tag code will follow.This will write the final ready-for-analysis csv file to your "results" directory.
-```{r set_options, echo = FALSE, message = FALSE}
+```{r prepare_data2, message = FALSE, warning = FALSE,results = "hide"}
 dat<-preparedata(
   datafile ="UCRSuChk_CWT_data.xlsx",
   MPRfilters = c("Terminal Sport","High Seas","Juvenile Sampling"),
@@ -141,8 +153,8 @@ dat<-preparedata(
   min_total_age = 3,
   max_ocean_age = 5,
   max_total_age = 6,
-  adjust_expanded_tags_for_terminal_harvest=T,
-  terminal_harvest_file="CowlitzSpCkHarvestRate_byage_10.20.2020.csv",
+  adjust_expanded_tags_for_terminal_harvest=F,
+  terminal_harvest_file=NA,
   set_expanded_to_raw_when_missing=T, #must be T if expanding escapement for terminal harvest!!!
   create_age_season_group = T, #organize output for analysis by "group" or "tagcode" or by release group (combined tag codes)
   release_group_DOYs = c(0,75, 115, 210,365), #day of year breaks for release groups
@@ -150,30 +162,17 @@ dat<-preparedata(
   rel_groups<-c("hatchery","stock","release_site","age_season_group","brood_year"),
   rec_groups<-c(NULL),
   writefile = "Yes",
-  filename = "CowlitzSpChk_SAR_Analysis_bygroup_"
+  filename = "UCRSuChk_SAR_Analysis_bygroup_"
 )
 ```
 
-
-# Run analysis (v1: SAR analysis by individual tag code)
+# Run analysis (v2: SAR analysis by individual tag code)
 This code will run the SAR analysis using JAGS, where logit(SAR) follows a multivariate normal random walk [INSERT MORE DETAILS OF GROUP ANALYSIS HERE]
-```{r set_options, echo = FALSE, message = FALSE}
-using("MASS","R2jags","RColorBrewer","mgcv")
-run_analysis(dat = "UCRSuChk_CWT_Analysis_bytag_Data_for_Analysis.csv",
-             bygrouportagcode = "tagcode",
-             grouplist=NA,#list groups for group analysis
-             options=NA #this is if you wanted to compare total returns as a function of different mixtures of smolt release strategies; right now only functional for grouped analysis
-)
+```{r run_analysis2, message = FALSE, warning = FALSE,results = "hide",fig.show='hide'}
+# using("MASS","R2jags","RColorBrewer","mgcv")
+# run_analysis(datafile = "CowlitzSpChk_SAR_Analysis_bygroup_Data_for_Analysis.csv",
+#              bygrouportagcode = "group",
+#              grouplist=c("early spring_2","spring_2","summer_1","fall_1"),
+#              options=NA #this is if you wanted to compare total returns as a function of different #mixtures of smolt release strategies; right now only functional for grouped analysis
+#)
 ```
-
-# Run analysis (v2: SAR analysis by grouped tag codes)
-This code will run the SAR analysis using JAGS, where SAR is estimated via a gam. The model structure is currently defined in the "runanalysis" function and may need to be edited to accomodate your analysis of interest.
-```{r set_options, echo = FALSE, message = FALSE}
-using("MASS","R2jags","RColorBrewer","mgcv")
-run_analysis(dat = "CowlitzSpChk_SAR_Analysis_bygroup_Data_for_Analysis.csv",
-             bygrouportagcode = "group",
-             grouplist=c("early spring_2","spring_2","summer_1","fall_1"),
-             options=NA #this is if you wanted to compare total returns as a function of different mixtures of smolt release strategies; right now only functional for grouped analysis
-)
-```
-

@@ -1,6 +1,6 @@
-run_analysis<-function(dat,bygrouportagcode,grouplist,options){
+run_analysis<-function(datafile,bygrouportagcode,grouplist,options){
   #load data
-  dat<-data.frame(read.csv(paste(getwd(),"/results/",dat,sep="")))
+  dat<-data.frame(read.csv(paste(getwd(),"/results/",datafile,sep="")))
   logit<-function(x){log(x/(1-x))}
   ilogit<-function(x){exp(x)/(1+exp(x))}
   if(bygrouportagcode=="group"){
@@ -74,12 +74,12 @@ run_analysis<-function(dat,bygrouportagcode,grouplist,options){
   if(bygrouportagcode=="tagcode"){
     mod3<-gam(cbind(round(Exp_Recoveries), Releases-round(Exp_Recoveries)) ~ 
               + s(brood_year,bs="ps",m=1,k=c(max(dat$brood_year)-min(dat$brood_year)+1))
-              + s(first_release_doy,bs="cc",m=2,k=24)
+              + s(first_release_doy,bs="cc",m=2,k=12)
               + s(avg_weight,bs="ts",m=2,k=4)
               + s(as.factor(dat$hatchery),bs="re",m=1)
               + s(as.factor(dat$release_site),bs="re",m=1)
               + s(as.factor(dat$hatchery),as.factor(dat$release_site),bs="re",m=1)
-              ,knots=list( first_release_doy=seq(0,365, len=24) )
+              ,knots=list( first_release_doy=seq(0,365, len=12) )
               ,family=quasibinomial(link="logit"), weights=SampleRate_obs ,data=dat,method="REML")
     sink("results/model_results.txt")
     print(summary(mod3))
