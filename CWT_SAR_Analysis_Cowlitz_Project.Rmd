@@ -179,9 +179,6 @@ This code will run the SAR analysis using JAGS, where logit(SAR) follows a multi
 # Evaluating Residualism
 We will now conduct a separate analysis to look at residualism of released hatchery smolts, comparing smolt age by tag group reported to RMIS with the observed freshwater age from CWT recoveries in the hatchery, sport fishery, and on the spawning grounds
 ```{r run_resid_analysis, message = FALSE, warning = FALSE,results = "hide",fig.show='hide'}
-#====================
-#look at residualism
-#===================
 dat<-data.frame(read_csv(file.path(getwd(),"results","CowlitzSpChk_SAR_Analysis_bytag_Data_for_Analysis.csv")))
 CWT_length_age<-data.frame(read_xlsx(path=file.path(getwd(),"supplementaldata","Cowlitz Chinook scale and CWT ages.xlsx"),sheet="FlatFile")%>%mutate(tag_code=as.integer(tag_code)))
 results<-data.frame(dat%>%left_join(CWT_length_age,by=c("tag_code"))%>%
