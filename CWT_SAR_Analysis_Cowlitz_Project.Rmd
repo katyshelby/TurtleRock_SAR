@@ -30,7 +30,7 @@ The purpose of this document outline use of functions in this repository to esti
 
 
 # Requirements
-All analyses require R software [**(link)**](https://cran.r-project.org/) (v3.4.3) for data retrieval, data processing, and summarizing model results.  JAGs software [**(link)**](http://mcmc-jags.sourceforge.net/) (v4.2.0) is used for fitting "group" based SAR models using for Markov chain Monte Carlo (MCMC) simulation), but is not neccessary for analyses based on invidual tag codes. 
+All analyses require R software [**(link)**](https://cran.r-project.org/) (v3.4.3) for data retrieval, data processing, and summarizing model results.  JAGs software [**(link)**](http://mcmc-jags.sourceforge.net/) (v4.2.0) is used for fitting "group" based SAR models using for Markov chain Monte Carlo (MCMC) simulation), but is not necessary for analyses based on individual tag codes. 
 
 
 # Functions
@@ -54,7 +54,7 @@ In addition to purr, We also need a few packages that are not included with the 
 #===============================================
 # Load packages, install and load if not already
 #===============================================
-using("lubridate", "openxlsx","tidyverse","readxl","scales")
+using("lubridate", "openxlsx","tidyverse","readxl","scales","kableExtra")
 if("MASS" %in% (.packages())){
   detach("package:MASS", unload=TRUE) 
 }
@@ -178,7 +178,7 @@ This code will run the SAR analysis using JAGS, where logit(SAR) follows a multi
 
 # Evaluating Residualism
 We will now conduct a separate analysis to look at residualism of released hatchery smolts, comparing smolt age by tag group reported to RMIS with the observed freshwater age from CWT recoveries in the hatchery, sport fishery, and on the spawning grounds
-```{r run_resid_analysis, message = FALSE, warning = FALSE,results = "hide",fig.show='hide'}
+```{r run_resid_analysis, message = FALSE, warning = FALSE,results = "show"}
 dat<-data.frame(read_csv(file.path(getwd(),"results","CowlitzSpChk_SAR_Analysis_bytag_Data_for_Analysis.csv")))
 CWT_length_age<-data.frame(read_xlsx(path=file.path(getwd(),"supplementaldata","Cowlitz Chinook scale and CWT ages.xlsx"),sheet="FlatFile")%>%mutate(tag_code=as.integer(tag_code)))
 results<-data.frame(dat%>%left_join(CWT_length_age,by=c("tag_code"))%>%
@@ -186,6 +186,12 @@ results<-data.frame(dat%>%left_join(CWT_length_age,by=c("tag_code"))%>%
   mutate(FW_age_scales=substr(AgeRead,2,2),season=ifelse(first_release_month<6,"spring",ifelse(first_release_month<9,"summer","fall")))%>%
   group_by(release_age,season,FW_age_scales)%>%
   summarize(count=n())%>%
-  mutate(freq = count / sum(count)))
+  mutate(`Percent` = (count / sum(count))*100, ReleaseGroup= paste0(season," ",release_age)))%>%
+  ungroup%>%
+  group_by(`Release Age` = release_age,Season=season)%>%summarise(count=sum(count),Percent, FW_age_scales= FW_age_scales)%>%pivot_wider(names_from = FW_age_scales,values_from=Percent)
 write.csv(results,paste(getwd(),"/results/Residualism_Scales_vs_CWT_FWage.csv",sep=""))
+results%>%
+  kbl(caption = "Table 1. Correspondence between freshwater scale age and CWT age for Cowlitz hatchery spring Chinook.",digits =1)%>%
+  kable_classic(full_width = F, html_font = "Cambria")%>%
+  add_header_above(c(" "," "," ", "Percent by Scale Age" = 2))
 ```
