@@ -1,6 +1,6 @@
 ---
-title: CWT SAR Analysis
-author: Thomas Buehrens & Ben Cox
+title: Turtle Rock SAR Analysis
+author: Katy Shelby, Chris Moran, Thomas Buehrens
 output:
   pdf_document:
     toc: yes
